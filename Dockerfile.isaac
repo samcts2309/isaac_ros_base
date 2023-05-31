@@ -93,7 +93,7 @@ RUN cd /tmp && \
     git clone https://github.com/nlohmann/json.git && cd json && \
     mkdir build && cd build && \
     cmake ../ . && \
-    make && \
+    make -j$(nproc) && \
     make install
 
 ENV ISAAC_ROS_ROOT /opt/ros/isaac_ros_ws
@@ -120,7 +120,7 @@ RUN mkdir -p ${ISAAC_ROS_ROOT}/src \
     && rm -Rf /var/lib/apt/lists/* \
     && apt-get clean \
     # Build Isaac ROS and clean resources
-    && colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=Release \
+    && colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 # Test all packages
 #RUN . /opt/ros/$ROS_DISTRO/install/setup.sh && \
