@@ -33,7 +33,7 @@ ARG JETPACK=5.0.2
 ARG L4T=35.1
 ARG L4T_MINOR_VERSION=1.0
 # NVIDIA software
-ARG TENSORRT_VERSION=8.4
+ARG TENSORRT_VERSION=8.5
 ARG TRITON_VERSION=2.24.0
 
 # Disable terminal interaction for apt
@@ -86,7 +86,7 @@ ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/compat"
 ########### VPI & TensorRT #################################
 
 RUN apt-get update \
-    && apt-get install -y tensorrt libnvvpi2 vpi2-dev \
+    && apt-get install -y tensorrt=8.5.2.2-1+cuda11.4 libnvvpi2 vpi2-dev \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 

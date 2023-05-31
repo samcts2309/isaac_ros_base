@@ -27,6 +27,7 @@ echo "Adding NVIDIA sources"
 
 apt-get update
 apt-get install -y software-properties-common
+apt-get upgrade -y
 apt-key adv --fetch-key https://repo.download.nvidia.com/jetson/jetson-ota-public.asc
 
 if [ "$(uname -m)" = "x86_64" ]; then
