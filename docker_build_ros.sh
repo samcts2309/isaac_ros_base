@@ -307,6 +307,16 @@ main()
             -f Dockerfile.$option \
             . || { echo "${red}docker build failure!${reset}"; exit 1; }
         
+        docker ${BUILDX} build \
+            $push_value \
+            $CI_OPTIONS \
+            -t $docker_image_name:$TAG \
+            -t $docker_image_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} \
+            --build-arg BASE_IMAGE="$docker_image_name:$TAG" \
+            $multiarch_option \
+            -f Dockerfile.realsense \
+            . || { echo "${red}docker build failure!${reset}"; exit 1; }
+
         exit 0
     elif [ $option = "humble" ] ; then
         # Humble reference
