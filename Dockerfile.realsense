@@ -14,4 +14,4 @@ RUN mkdir -p /opt/realsense/
 COPY realsense/hotplug-realsense.sh /opt/realsense/hotplug-realsense.sh
 
 # Copy custom udev rules file
-COPY udev_rules/99-realsense-libusb-custom.rules /etc/udev/rules.d/99-realsense-libusb-custom.rules
+COPY realsense/99-realsense-libusb-custom.rules /etc/udev/rules.d/99-realsense-libusb-custom.rules
