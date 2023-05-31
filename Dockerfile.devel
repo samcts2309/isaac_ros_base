@@ -67,7 +67,7 @@ RUN wget -qO - https://apt.kitware.com/keys/kitware-archive-latest.asc | apt-key
     apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" && \
     apt-get update && \
     apt-get install -y --no-install-recommends --only-upgrade \
-            cmake=3.23.2-0kitware1$(lsb_release -rs).1 cmake-data=3.23.2-0kitware1$(lsb_release -rs).1 \
+            cmake=3.23.2-0kitware1"$(lsb_release -rs)".1 cmake-data=3.23.2-0kitware1"$(lsb_release -rs).1" \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
