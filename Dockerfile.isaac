@@ -61,7 +61,7 @@ RUN python3 -m pip install -U \
 # Clone all packages from rosinstall
 RUN mkdir -p ${ROS_ROOT}/src \
     && cd ${ROS_ROOT} \
-    && rosinstall_generator --deps --rosdistro ${ROS_DISTRO} \
+    && ROS_PACKAGE_PATH=${ROS_ROOT} rosinstall_generator --deps --exclude RPP --rosdistro ${ROS_DISTRO} \
         behaviortree_cpp_v3 \
         slam_toolbox \
         ompl \
