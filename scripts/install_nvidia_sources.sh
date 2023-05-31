@@ -25,7 +25,7 @@ L4T=$1
 
 echo "Adding NVIDIA sources"
 
-rm -i /etc/apt/sources.list.d/cuda.list
+rm /etc/apt/sources.list.d/cuda.list
 apt-get update
 apt-get install -y software-properties-common
 apt-key adv --fetch-key https://repo.download.nvidia.com/jetson/jetson-ota-public.asc
