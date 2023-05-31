@@ -89,6 +89,13 @@ RUN mkdir -p ${ROS_ROOT}/src \
 
 ###### Isaac ROS - packages  ##########################
 
+RUN cd /tmp && \
+    git clone https://github.com/nlohmann/json.git && cd json && \
+    mkdir build && cd build && \
+    cmake ../ . && \
+    make && \
+    make install
+
 ENV ISAAC_ROS_ROOT /opt/ros/isaac_ros_ws
 # Copy wstool isaac_ros.rosinstall
 COPY scripts/rosinstall/isaac_ros_all.rosinstall /isaac_ros_all.rosinstall
@@ -114,7 +121,6 @@ RUN mkdir -p ${ISAAC_ROS_ROOT}/src \
     && apt-get clean \
     # Build Isaac ROS and clean resources
     && colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=Release \
-    && rm -Rf src build log
 
 # Test all packages
 #RUN . /opt/ros/$ROS_DISTRO/install/setup.sh && \
