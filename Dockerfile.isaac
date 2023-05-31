@@ -65,9 +65,9 @@ RUN mkdir -p ${ROS_ROOT}/src \
         behaviortree_cpp_v3 \
         slam_toolbox \
         ompl \
-        navigation2 \
-        perception_pcl \
-        sensor_msgs_py \
+        # navigation2 \
+        # perception_pcl \
+        # sensor_msgs_py \
         > ros2.${ROS_DISTRO}.rosinstall \
     && cat ros2.${ROS_DISTRO}.rosinstall \
     && vcs import src < ros2.${ROS_DISTRO}.rosinstall \
