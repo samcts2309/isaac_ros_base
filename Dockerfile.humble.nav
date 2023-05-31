@@ -1,0 +1,158 @@
+ARG BASE_IMAGE=rbonghi/isaac-ros-base:humble-core-devel
+FROM ${BASE_IMAGE}
+
+# Install perception_pcl
+RUN mkdir -p /opt/ros/humble/src && cd /opt/ros/humble/src \
+    && git clone https://github.com/ros-perception/pcl_msgs.git && cd pcl_msgs && git checkout ros2 && cd .. \
+    && git clone https://github.com/ros-perception/perception_pcl.git \
+    && source /opt/ros/humble/setup.bash \
+    && cd /opt/ros/humble \
+    && rosdep install -y --ignore-src --from-paths src --rosdistro humble \
+    && colcon build --merge-install --packages-up-to pcl_conversions \
+    && rm -Rf src logs build
+
+# Install sensor_msgs_py
+RUN mkdir -p /opt/ros/humble/src && cd /opt/ros/humble/src \
+    && git clone https://github.com/ros2/common_interfaces.git && cd common_interfaces && git checkout 4.5.0 && cd .. \
+    && source /opt/ros/humble/setup.bash \
+    && cd /opt/ros/humble \
+    && rosdep install -y --ignore-src --from-paths src --rosdistro humble \
+    && colcon build --merge-install --packages-up-to sensor_msgs_py \
+    && rm -Rf src logs build
+
+# Install nav2
+RUN git config --global user.email "novelte@noveltebot.com" && \
+    git config --global user.name "novelte"
+
+RUN sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list' && \
+    wget http://packages.osrfoundation.org/gazebo.key -O - | apt-key add - && \
+    apt-get update && \
+    apt-get install libignition-math6-dev libxrandr-dev -y
+
+RUN mkdir -p /opt/ros/humble/src && cd /opt/ros/humble/src \
+    && git clone https://github.com/ros-planning/navigation2.git && cd navigation2 && git checkout humble \
+    && git cherry-pick b499116e017ccdbf13a8ba57c303aae54708dfc0 && cd .. \
+    && git clone https://github.com/BehaviorTree/BehaviorTree.CPP.git && cd BehaviorTree.CPP && git checkout tags/3.7.0 && cd .. \
+    && git clone https://github.com/ros/angles.git && cd angles && git checkout ros2 && cd .. \
+    && git clone https://github.com/ros2/rviz.git && cd rviz && git checkout humble && cd .. \
+    && git clone https://github.com/ros-planning/navigation_msgs.git && cd navigation_msgs && git checkout humble && cd .. \
+    && git clone https://github.com/ompl/ompl.git && cd ompl && cd .. \
+    && git clone https://github.com/ros/resource_retriever.git && cd resource_retriever && git checkout humble && cd .. \
+    && git clone https://github.com/ros-visualization/interactive_markers.git && cd interactive_markers && git checkout humble && cd .. \
+    && git clone https://github.com/ros-perception/laser_geometry.git && cd laser_geometry && git checkout humble && cd .. \
+    && git clone https://github.com/ros/bond_core.git && cd bond_core && git checkout ros2 && cd .. \
+    && git clone https://github.com/ros/diagnostics.git && cd diagnostics && git checkout ros2 && cd ..
+
+RUN cd /tmp && \
+    git clone https://github.com/nlohmann/json.git && cd json && \
+    mkdir build && cd build && \
+    cmake ../ . && \
+    make && \
+    make install
+
+RUN source /opt/ros/humble/setup.bash \
+    && cd /opt/ros/humble \
+    && rosdep install -y -r --ignore-src --from-paths src --rosdistro humble \
+    && colcon build --merge-install --packages-up-to-regex nav2* --packages-ignore nav2_system_tests nav2_mppi_controller \
+    && rm -Rf src logs build
+
+# Add MQTT binaries and libraries
+# Note: VPN cannot be on for pymongo download
+RUN python3 -m pip install -U \
+  pymongo paho-mqtt
+
+RUN mkdir -p /opt/ros/humble/src && cd /opt/ros/humble/src \
+    && git clone https://github.com/ipa320/vda5050_msgs.git vda5050_root && cd vda5050_root && git checkout ros2 \
+    && cd .. && mv vda5050_root/vda5050_msgs/ vda5050_msgs \
+    && rm -rf vda5050_root \
+    && source /opt/ros/humble/setup.bash \
+    && cd /opt/ros/humble/ && colcon build --merge-install --packages-up-to vda5050_msgs \
+    && rm -Rf logs build
+
+RUN mkdir -p /opt/ros/humble/src && cd /opt/ros/humble/src \
+    && git clone https://github.com/RobotWebTools/rosbridge_suite.git && cd rosbridge_suite && git checkout ros2 \
+    && cd .. \
+    && source /opt/ros/humble/setup.bash \
+    && cd /opt/ros/humble/ && colcon build --merge-install --packages-up-to rosbridge_library \
+    && rm -Rf logs build
+
+# Build googletest
+RUN cd /usr/src/googletest && cmake . && cmake --build . --target install
+
+# Install ros2 control
+RUN mkdir -p /opt/ros/humble/src && cd /opt/ros/humble/src \
+    && git clone https://github.com/ros/xacro.git && cd xacro && git checkout ros2 && cd .. \
+    && git clone https://github.com/ros-controls/control_msgs.git && cd control_msgs && git checkout 3.0.0 && cd .. \
+    && git clone https://github.com/ros-controls/control_toolbox.git && cd control_toolbox && git checkout ros2-master && cd .. \
+    && git clone https://github.com/ros-controls/realtime_tools.git && cd realtime_tools && git checkout foxy-devel && cd .. \
+    && git clone https://github.com/samcts2309/ros2_control.git
+
+RUN apt-get update && \
+    apt-get install -y \
+    python3-tornado \
+    python3-twisted \
+    python3-autobahn \
+    python3-bson
+
+RUN source /opt/ros/humble/setup.bash \
+    && cd /opt/ros/humble \
+    && rosdep install -y -r --ignore-src --from-paths src --rosdistro humble \
+    && colcon build --merge-install --cmake-args -DBUILD_TESTING=off \
+    && rm -Rf src logs build
+
+# Build Depthai
+RUN mkdir -p /opt/ros/humble/src && cd /opt/ros/humble/src \
+    && git clone --recursive https://github.com/Serafadam/depthai_ros_driver
+
+RUN source /opt/ros/humble/setup.bash \
+    && cd /opt/ros/humble \
+    && rosdep install -y -r --ignore-src --from-paths src --rosdistro humble --skip-keys depthai \
+    && colcon build --merge-install  --cmake-args -DCMAKE_BUILD_TYPE=Release --cmake-args -DBUILD_TESTING=OFF --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON --cmake-args -DCMAKE_POSITION_INDEPENDENT_CODE=ON --cmake-args -DBUILD_SHARED_LIBS=ON \
+    && rm -Rf src logs build
+
+# Install robot_localization
+RUN mkdir -p /opt/ros/humble/src && cd /opt/ros/humble/src \
+    && git clone https://github.com/ros-geographic-info/geographic_info.git && cd geographic_info && git checkout ros2 && cd .. \
+    && git clone https://github.com/cra-ros-pkg/robot_localization.git && cd robot_localization && git checkout humble-devel
+
+RUN source /opt/ros/humble/setup.bash \
+    && cd /opt/ros/humble \
+    && rosdep install -y -r --ignore-src --from-paths src --rosdistro humble --skip-keys "libopencv-dev libopencv-contrib-dev libopencv-imgproc-dev python-opencv python3-opencv" \
+    && colcon build --merge-install --cmake-args -DBUILD_TESTING=off \
+    && rm -Rf src logs build
+
+# Install Python Dependencies
+RUN python3 -m pip install -U future-annotations
+
+# Added default profile
+COPY network-profile/fastrtps-profile.xml /usr/local/bin/scripts/
+ENV FASTRTPS_DEFAULT_PROFILES_FILE=/usr/local/bin/scripts/fastrtps-profile.xml
+
+# Restore using the default DDS middleware: FastRTPS
+ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+
+RUN apt-get update && apt-get install -y libusb-1.0-0-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+### -----------------------------
+
+# Setup non-root admin user
+ARG USERNAME=admin
+ARG USER_UID=1000
+ARG USER_GID=1000
+
+# Create the 'admin' user
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME \
+    && adduser ${USERNAME} video && adduser ${USERNAME} sudo
+
+# Copy scripts
+RUN mkdir -p /usr/local/bin/scripts
+COPY entrypoints/dev_entrypoint.sh /usr/local/bin/scripts/
+RUN chmod a+x /usr/local/bin/scripts/*.sh
+
+ENV USERNAME=${USERNAME}
+ENV USER_GID=${USER_GID}
+ENV USER_UID=${USER_UID}
