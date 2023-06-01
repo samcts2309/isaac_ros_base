@@ -127,8 +127,8 @@ RUN source /opt/ros/humble/setup.bash \
 RUN python3 -m pip install -U future-annotations
 
 # Added default profile
-COPY network-profile/fastrtps-profile.xml /usr/local/bin/scripts/
-ENV FASTRTPS_DEFAULT_PROFILES_FILE=/usr/local/bin/scripts/fastrtps-profile.xml
+COPY middleware_profiles/rtps_udp_profile.xml /usr/local/bin/scripts/
+ENV FASTRTPS_DEFAULT_PROFILES_FILE=/usr/local/bin/scripts/rtps_udp_profile.xml
 
 # Restore using the default DDS middleware: FastRTPS
 ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
