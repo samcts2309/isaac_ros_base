@@ -152,7 +152,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
 
 # Copy scripts
 RUN mkdir -p /usr/local/bin/scripts
-COPY scripts/workspace-entrypoints.sh /usr/local/bin/scripts/
+COPY scripts/workspace-entrypoint.sh /usr/local/bin/scripts/
 RUN chmod a+x /usr/local/bin/scripts/*.sh
 
 ENV USERNAME=${USERNAME}
