@@ -25,7 +25,6 @@ L4T=$1
 
 echo "Adding NVIDIA sources"
 
-rm /etc/apt/sources.list.d/cuda.list
 apt-get update
 apt-get install -y software-properties-common
 apt-key adv --fetch-key https://repo.download.nvidia.com/jetson/jetson-ota-public.asc
@@ -36,6 +35,16 @@ if [ "$(uname -m)" = "x86_64" ]; then
 else
     # Adding sources for NVIDIA Jetson
     add-apt-repository "deb https://repo.download.nvidia.com/jetson/common r${L4T} main"
+
+    # clean up apt and remote original cuda
+    rm /etc/apt/sources.list.d/cuda.list
+    rm -rf /var/lib/apt/lists/*
+    apt-get clean
+
+    apt-get --purge remove "*cublas*" "cuda*"
+    apr-get update
+    
+    apt-get install cuda
     # Workaround to source libraries on Docker
     echo "Installing sources jetson-multimedia-api"
     # Manually install jetson-multimedia-api sources
