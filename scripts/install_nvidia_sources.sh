@@ -42,7 +42,7 @@ else
     apt-get clean
 
     apt-get --purge --allow-change-held-packages remove -y "*cublas*" "cuda*"
-    apr-get update
+    apt-get update
     
     apt-get install -y cuda
     apt-get upgrade -y 
