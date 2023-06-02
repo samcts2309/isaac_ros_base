@@ -128,6 +128,7 @@ RUN python3 -m pip install -U future-annotations
 
 # Added default profile
 COPY middleware_profiles/rtps_udp_profile.xml /usr/local/bin/scripts/
+RUN chmod a+rx /usr/local/bin/scripts/rtps_udp_profile.xml
 ENV FASTRTPS_DEFAULT_PROFILES_FILE=/usr/local/bin/scripts/rtps_udp_profile.xml
 
 # Restore using the default DDS middleware: FastRTPS
@@ -153,7 +154,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
 # Copy scripts
 RUN mkdir -p /usr/local/bin/scripts
 COPY scripts/workspace-entrypoint.sh /usr/local/bin/scripts/
-RUN chmod a+x /usr/local/bin/scripts/*.sh
+RUN chmod a+rx /usr/local/bin/scripts/*.sh
 
 ENV USERNAME=${USERNAME}
 ENV USER_GID=${USER_GID}
