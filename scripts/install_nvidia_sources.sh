@@ -41,7 +41,7 @@ else
     rm -rf /var/lib/apt/lists/*
     apt-get clean
 
-    apt-get --purge remove -y "*cublas*" "cuda*"
+    apt-get --purge --allow-change-held-packages remove -y "*cublas*" "cuda*"
     apr-get update
     
     apt-get install -y cuda
