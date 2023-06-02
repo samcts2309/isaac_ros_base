@@ -44,7 +44,8 @@ else
     apt-get --purge remove "*cublas*" "cuda*"
     apr-get update
     
-    apt-get install cuda
+    apt-get install -y cuda
+    apt-get upgrade -y 
     # Workaround to source libraries on Docker
     echo "Installing sources jetson-multimedia-api"
     # Manually install jetson-multimedia-api sources
