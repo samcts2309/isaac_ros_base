@@ -102,15 +102,15 @@ RUN source /opt/ros/humble/setup.bash \
     && colcon build --merge-install --cmake-args -DBUILD_TESTING=off \
     && rm -Rf src logs build
 
-# Build Depthai
-RUN mkdir -p /opt/ros/humble/src && cd /opt/ros/humble/src \
-    && git clone --recursive https://github.com/Serafadam/depthai_ros_driver
+# # Build Depthai
+# RUN mkdir -p /opt/ros/humble/src && cd /opt/ros/humble/src \
+#     && git clone --recursive https://github.com/Serafadam/depthai_ros_driver
 
-RUN source /opt/ros/humble/setup.bash \
-    && cd /opt/ros/humble \
-    && rosdep install -y -r --ignore-src --from-paths src --rosdistro humble --skip-keys depthai \
-    && colcon build --merge-install  --cmake-args -DCMAKE_BUILD_TYPE=Release --cmake-args -DBUILD_TESTING=OFF --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON --cmake-args -DCMAKE_POSITION_INDEPENDENT_CODE=ON --cmake-args -DBUILD_SHARED_LIBS=ON \
-    && rm -Rf src logs build
+# RUN source /opt/ros/humble/setup.bash \
+#     && cd /opt/ros/humble \
+#     && rosdep install -y -r --ignore-src --from-paths src --rosdistro humble --skip-keys depthai \
+#     && colcon build --merge-install  --cmake-args -DCMAKE_BUILD_TYPE=Release --cmake-args -DBUILD_TESTING=OFF --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON --cmake-args -DCMAKE_POSITION_INDEPENDENT_CODE=ON --cmake-args -DBUILD_SHARED_LIBS=ON \
+#     && rm -Rf src logs build
 
 # Install robot_localization
 RUN mkdir -p /opt/ros/humble/src && cd /opt/ros/humble/src \
@@ -124,7 +124,7 @@ RUN source /opt/ros/humble/setup.bash \
     && rm -Rf src logs build
 
 # Install Python Dependencies
-RUN python3 -m pip install -U future-annotations
+RUN python3 -m pip install -U future-annotations depthai
 
 # Added default profile
 COPY middleware_profiles/rtps_udp_profile.xml /usr/local/bin/scripts/
