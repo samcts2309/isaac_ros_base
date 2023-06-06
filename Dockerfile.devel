@@ -103,7 +103,7 @@ RUN apt-get update \
     && apt-get clean
 
 ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/nvidia/vpi2/lib64"
-ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda-11.4/targets/x86_64-linux/lib/stubs:/usr/local/cuda-11.4/targets/sbsa-linux/lib/stubs"
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda-11.4/targets/x86_64-linux/lib/stubs:/usr/local/cuda-11.4/targets/aarch64-linux/lib/stubs"
 
 ############ TAO converter #################################
 
@@ -133,7 +133,7 @@ RUN TERM=xterm bash /opt/install_opencv.sh ${OPENCV_VERSION} \
 ############ Patch #########################################
 # Apply libcudacxx patch for fixing C++17 compilation errors in GXF
 COPY patches/libcudacxx_aarch64_cuda_11_4.diff /tmp/
-RUN patch -i /tmp/libcudacxx_aarch64_cuda_11_4.diff /usr/local/cuda-11.4/targets/sbsa-linux/include/cuda/std/detail/libcxx/include/cmath
+RUN patch -i /tmp/libcudacxx_aarch64_cuda_11_4.diff /usr/local/cuda-11.4/targets/aarch64-linux/include/cuda/std/detail/libcxx/include/cmath
 
 ############################################################
 
