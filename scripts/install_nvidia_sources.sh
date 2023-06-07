@@ -46,7 +46,7 @@ else
     
     a=( ${L4T//./ } ) # replace points, split into array
     if (($a < 35)) ; then
-        apt-get install -y nvidia-cuda
+        apt-get install -y nvidia-l4t-cuda
     else 
         apt-get install -y cuda
     fi
