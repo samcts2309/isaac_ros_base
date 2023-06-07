@@ -213,7 +213,8 @@ main()
         fi
     fi
 
-    if [ $L4T < 35.0] ; then
+    a=( ${L4T//./ } ) # replace points, split into array
+    if (($a < 35)) ; then
         BASE_DIST=ubuntu18.04
     fi
 
