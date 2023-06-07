@@ -44,7 +44,14 @@ else
     apt-get --purge --allow-change-held-packages remove -y "*cublas*" "cuda*"
     apt-get update
     
-    apt-get install -y cuda
+    a=( ${L4T//./ } ) # replace points, split into array
+    if (($a < 35)) ; then
+        apt-get install -y nvidia-cuda
+    else 
+        apt-get install -y cuda
+    fi
+
+    
     apt-get upgrade -y 
     # Workaround to source libraries on Docker
     echo "Installing sources jetson-multimedia-api"
