@@ -213,6 +213,10 @@ main()
         fi
     fi
 
+    if [ $L4T < 35.0] ; then
+        BASE_DIST=ubuntu18.04
+    fi
+
     # Build tag name
     local TAG="$option"
 
