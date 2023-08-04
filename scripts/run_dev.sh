@@ -35,8 +35,6 @@ docker run -it \
     -v /var/novelte:/var/novelte \
     --name "$CONTAINER_NAME" \
     --runtime nvidia \
-    --user="admin" \
-    --entrypoint /usr/local/bin/scripts/workspace-entrypoint.sh \
     --workdir /workspaces/jetson-dev \
     $@ \
     $BASE_NAME \
