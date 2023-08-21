@@ -38,11 +38,11 @@ if [[ $PLATFORM == "aarch64" ]]; then
     fi
 fi
 
-CONTAINER_NAME="jetson_dev-container"
+CONTAINER_NAME=$3
 
 # Run container from image
 print_info "Running $CONTAINER_NAME"
-shift 2
+shift 3
 print_info $@
 docker run -it \
     --privileged \
@@ -54,6 +54,7 @@ docker run -it \
     -v /etc/localtime:/etc/localtime:ro \
     --name "$CONTAINER_NAME" \
     --runtime nvidia \
+    --entrypoint /usr/local/bin/scripts/workspace-entrypoint.sh \
     --workdir /workspaces/jetson-dev \
     $@ \
     $BASE_NAME \
