@@ -34,8 +34,8 @@ reset=`tput sgr0`
 docker_image_name=rbonghi/isaac-ros-base
 BASE_DIST=ubuntu20.04
 L4T=35.1
-CUDA_VERSION=11.4.1
-OPENCV_VERSION=4.5.0
+CUDA_VERSION=11.4.3
+OPENCV_VERSION=4.6.0
 BUILD_BASE=devel
 
 usage()
