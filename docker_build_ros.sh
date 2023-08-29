@@ -31,9 +31,9 @@ yellow=`tput setaf 3`
 blue=`tput setaf 4`
 reset=`tput sgr0`
 
-docker_image_name=rbonghi/isaac-ros-base
+docker_image_name=novelte/jetson_dev
 BASE_DIST=ubuntu20.04
-L4T=35.1
+L4T=35.4
 CUDA_VERSION=11.4.3
 OPENCV_VERSION=4.6.0
 BUILD_BASE=devel
