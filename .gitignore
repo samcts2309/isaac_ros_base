@@ -2,3 +2,4 @@ old/
 .env
 github-actions/
 Dockerfile.test
+**.tar.gz
