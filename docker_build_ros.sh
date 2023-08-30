@@ -229,8 +229,9 @@ main()
         docker run \
                 --rm \
                 --volume $PWD:/mount \
-                $docker_repo_name:opencv-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST} \
+                $docker_repo_name:opencv-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} \
                 cp /opt/opencv/build/$OPENCV_PACKAGE /mount
+        
         if $? ; then
             echo "${red}Error to run the extraction${reset}"
             exit 1
