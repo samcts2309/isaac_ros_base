@@ -29,26 +29,22 @@ apt-get update
 apt-get install -y software-properties-common
 apt-key adv --fetch-key https://repo.download.nvidia.com/jetson/jetson-ota-public.asc
 
+# clean up apt and remote original cuda
+rm /etc/apt/sources.list.d/cuda.list
+rm -rf /var/lib/apt/lists/*
+apt-get clean
+apt-get update
 if [ "$(uname -m)" = "x86_64" ]; then
     # Adding sources for discrete NVIDIA GPU
     add-apt-repository "deb http://repo.download.nvidia.com/jetson/x86_64/focal r${L4T} main"
 else
     # Adding sources for NVIDIA Jetson
     add-apt-repository "deb https://repo.download.nvidia.com/jetson/common r${L4T} main"
-
-    # clean up apt and remote original cuda
-    rm /etc/apt/sources.list.d/cuda.list
-    rm -rf /var/lib/apt/lists/*
-    apt-get clean
-
-    apt-get --purge --allow-change-held-packages remove -y "*cublas*" "cuda*"
-    apt-get update
     
-    a=( ${L4T//./ } ) # replace points, split into array
-    if (($a < 35)) ; then
+    if ((${L4T//./ } < 35)) ; then
+        apt-get --purge --allow-change-held-packages remove -y "*cublas*" "cuda*"
+        apt-get update
         apt-get install -y nvidia-l4t-cuda
-    else 
-        apt-get install -y cuda
     fi
 
     
