@@ -224,7 +224,7 @@ main()
     # copy deb packages to jetson-containers/packages directory
     if [ $option = "opencv" ] && $EXTRACT ; then
         local architecture=$(uname -i)
-        local OPENCV_PACKAGE="OpenCV-${CUDA_VERSION}-${architecture}.tar.gz"
+        local OPENCV_PACKAGE="OpenCV-${OPENCV_VERSION}-${architecture}.tar.gz"
 
         docker run \
                 --rm \
