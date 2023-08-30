@@ -31,7 +31,7 @@ yellow=`tput setaf 3`
 blue=`tput setaf 4`
 reset=`tput sgr0`
 
-docker_image_name=novelte/jetson_dev
+docker_repo_name=novelte/jetson_dev
 BASE_DIST=ubuntu20.04
 L4T=35.4
 CUDA_VERSION=11.4.3
@@ -80,9 +80,9 @@ message_start()
         echo " - ${bold}CI${reset} setup"
     fi
     if $PUSH ; then
-        echo " - ${bold}BUILD & PUSH${reset} $docker_image_name:$TAG"
+        echo " - ${bold}BUILD & PUSH${reset} $docker_repo_name:$TAG"
     else
-        echo " - ${bold}BUILD${reset} $docker_image_name:$TAG"
+        echo " - ${bold}BUILD${reset} $docker_repo_name:$TAG"
     fi
 }
 
@@ -229,7 +229,7 @@ main()
         docker run \
                 --rm \
                 --volume $PWD:/mount \
-                $docker_image_name:opencv-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST} \
+                $docker_repo_name:opencv-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST} \
                 cp /opt/opencv/build/$OPENCV_PACKAGE /mount
         if $? ; then
             echo "${red}Error to run the extraction${reset}"
@@ -256,8 +256,8 @@ main()
         docker ${BUILDX} build \
             $push_value \
             $CI_OPTIONS \
-            -t $docker_image_name:opencv-${OPENCV_VERSION} \
-            -t $docker_image_name:opencv-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} \
+            -t $docker_repo_name:opencv-${OPENCV_VERSION} \
+            -t $docker_repo_name:opencv-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} \
             --build-arg BASE_DIST="$BASE_DIST" \
             --build-arg L4T="$L4T" \
             --build-arg CUDA_VERSION="$CUDA_VERSION" \
@@ -269,17 +269,27 @@ main()
         exit 0
     elif [ $option = "devel" ] || [ $option = "runtime" ] ; then
 
-        local TENSORRT_VERSION=8.4
-
-        local TRITON_VERSION=2.24.0
-        if [ $L4T == 35.2 ] ; then
-            TRITON_VERSION=2.30.0
-        fi
+        # L4T 35.1
         local L4T_MINOR_VERSION=1.0
+        local JETPACK=5.0.2
+        local TAO_TENSORRT_VERSION=8.4
+        local TRITON_VERSION=2.24.0
+
         if [ $L4T == 35.2 ] ; then
             L4T_MINOR_VERSION=2.0
+            JETPACK=5.1
+            TRITON_VERSION=2.30.0
+        elif [ $L4T == 35.3 ] ; then
+            L4T_MINOR_VERSION=3.0
+            JETPACK=5.1
+            TRITON_VERSION=2.30.0
+        elif [ $L4T == 35.4 ] ; then
+            L4T_MINOR_VERSION=4.0
+            JETPACK=5.1
+            TRITON_VERSION=2.30.0
         fi
-        local JETPACK=5.0.2
+
+        
         if [ $L4T == 35.2 ] ; then
             JETPACK=5.1
         fi
@@ -298,8 +308,8 @@ main()
         docker ${BUILDX} build \
             $push_value \
             $CI_OPTIONS \
-            -t $docker_image_name:$TAG \
-            -t $docker_image_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} \
+            -t $docker_repo_name:$TAG \
+            -t $docker_repo_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} \
             --build-arg TENSORRT_VERSION="$TENSORRT_VERSION" \
             --build-arg TRITON_VERSION="$TRITON_VERSION" \
             --build-arg BASE_DIST="$BASE_DIST" \
@@ -308,6 +318,7 @@ main()
             --build-arg JETPACK="$JETPACK" \
             --build-arg CUDA_VERSION="$CUDA_VERSION" \
             --build-arg OPENCV_VERSION="$OPENCV_VERSION" \
+            --build-arg DOCKER_REPO="$docker_repo_name" \
             $multiarch_option \
             -f Dockerfile.$option \
             . || { echo "${red}docker build failure!${reset}"; exit 1; }
@@ -315,9 +326,9 @@ main()
         docker ${BUILDX} build \
             $push_value \
             $CI_OPTIONS \
-            -t $docker_image_name:$TAG \
-            -t $docker_image_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} \
-            --build-arg BASE_IMAGE="$docker_image_name:$TAG" \
+            -t $docker_repo_name:$TAG \
+            -t $docker_repo_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} \
+            --build-arg BASE_IMAGE="$docker_repo_name:$TAG" \
             $multiarch_option \
             -f Dockerfile.realsense \
             . || { echo "${red}docker build failure!${reset}"; exit 1; }
@@ -327,9 +338,9 @@ main()
         # Humble reference
         TAG="humble-$ROS_PKG-$BUILD_BASE"
         if [ $ROS_PKG = "core" ] ; then
-            BASE_IMAGE=$docker_image_name:$BUILD_BASE-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T}
+            BASE_IMAGE=$docker_repo_name:$BUILD_BASE-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T}
         elif [ $ROS_PKG = "base" ] ; then
-            BASE_IMAGE=$docker_image_name:humble-core-$BUILD_BASE-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T}
+            BASE_IMAGE=$docker_repo_name:humble-core-$BUILD_BASE-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T}
         else
             echo "${red}Error base image!${reset}"
             exit 1
@@ -343,8 +354,8 @@ main()
         docker ${BUILDX} build \
             $push_value \
             $CI_OPTIONS \
-            -t $docker_image_name:$TAG \
-            -t $docker_image_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} \
+            -t $docker_repo_name:$TAG \
+            -t $docker_repo_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} \
             --build-arg BASE_IMAGE="$BASE_IMAGE" \
             $multiarch_option \
             -f Dockerfile.humble.$ROS_PKG \
@@ -354,7 +365,7 @@ main()
     elif [ $option = "gems" ] ; then
         # tag and image reference
         TAG="gems-$BUILD_BASE"
-        BASE_IMAGE=$docker_image_name:humble-base-$BUILD_BASE-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T}
+        BASE_IMAGE=$docker_repo_name:humble-base-$BUILD_BASE-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T}
         #### Message #############
         message_start $PUSH $CI_BUILD $TAG
         echo " - ${bold}${option^^}${reset} image"
@@ -364,27 +375,27 @@ main()
         if $MANIFEST ; then
             echo "${green}Build and push manifest${reset}"
             # Pull images
-            #docker pull $docker_image_name:$TAG-arm64
-            #docker pull $docker_image_name:$TAG-amd64
+            #docker pull $docker_repo_name:$TAG-arm64
+            #docker pull $docker_repo_name:$TAG-amd64
             # Create a manifest
-            docker manifest create $docker_image_name:$TAG --amend $docker_image_name:$TAG-arm64 --amend $docker_image_name:$TAG-amd64
-            docker manifest annotate --arch arm64 $docker_image_name:$TAG $docker_image_name:$TAG-arm64
-            docker manifest annotate --arch amd64 $docker_image_name:$TAG $docker_image_name:$TAG-amd64
+            docker manifest create $docker_repo_name:$TAG --amend $docker_repo_name:$TAG-arm64 --amend $docker_repo_name:$TAG-amd64
+            docker manifest annotate --arch arm64 $docker_repo_name:$TAG $docker_repo_name:$TAG-arm64
+            docker manifest annotate --arch amd64 $docker_repo_name:$TAG $docker_repo_name:$TAG-amd64
             # Create a manifest
-            docker manifest create $docker_image_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} --amend $docker_image_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T}-arm64 --amend $docker_image_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T}-amd64
-            docker manifest annotate --arch arm64 $docker_image_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} $docker_image_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T}-arm64
-            docker manifest annotate --arch amd64 $docker_image_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} $docker_image_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T}-amd64
+            docker manifest create $docker_repo_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} --amend $docker_repo_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T}-arm64 --amend $docker_repo_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T}-amd64
+            docker manifest annotate --arch arm64 $docker_repo_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} $docker_repo_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T}-arm64
+            docker manifest annotate --arch amd64 $docker_repo_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} $docker_repo_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T}-amd64
             # Docker push manifest
-            docker manifest push $docker_image_name:$TAG
-            docker manifest push $docker_image_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T}
+            docker manifest push $docker_repo_name:$TAG
+            docker manifest push $docker_repo_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T}
             exit 0
         fi
         # Otherwise build the image
         # Temporary disabled buildx, need fix VPI for x86 architecture
         docker build \
             $CI_OPTIONS \
-            -t $docker_image_name:$TAG-$ARCH \
-            -t $docker_image_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T}-$ARCH \
+            -t $docker_repo_name:$TAG-$ARCH \
+            -t $docker_repo_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T}-$ARCH \
             --build-arg BASE_IMAGE="$BASE_IMAGE" \
             -f Dockerfile.isaac \
             . || { echo "${red}docker build failure!${reset}"; exit 1; }

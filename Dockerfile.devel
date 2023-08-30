@@ -21,8 +21,9 @@
 ARG BASE_DIST
 ARG CUDA_VERSION
 ARG OPENCV_VERSION
+ARG DOCKER_REPO
 # Intra layer OpenCV
-FROM rbonghi/isaac-ros-base:opencv-${OPENCV_VERSION} as opencv_builder
+FROM ${DOCKER_REPO}:opencv-${OPENCV_VERSION} as opencv_builder
 
 RUN cp /opt/opencv/build/OpenCV-*.tar.gz /OpenCV.tar.gz
 
@@ -33,7 +34,7 @@ ARG JETPACK
 ARG L4T
 ARG L4T_MINOR_VERSION
 # NVIDIA software
-ARG TENSORRT_VERSION=8.5
+ARG TAO_TENSORRT_VERSION=8.4
 ARG TRITON_VERSION
 
 # Disable terminal interaction for apt
@@ -108,7 +109,7 @@ ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda-11.4/targets/x86_64-linu
 ############ TAO converter #################################
 
 COPY tao /opt/nvidia/tao
-RUN TERM=xterm bash /opt/nvidia/tao/install_tao.sh ${TENSORRT_VERSION} \
+RUN TERM=xterm bash /opt/nvidia/tao/install_tao.sh ${TAO_TENSORRT_VERSION} \
     && rm /opt/nvidia/tao/install_tao.sh
 
 ENV PATH="${PATH}:/opt/nvidia/tao"

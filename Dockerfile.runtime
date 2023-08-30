@@ -21,8 +21,9 @@
 ARG BASE_DIST
 ARG CUDA_VERSION
 ARG OPENCV_VERSION
+ARG DOCKER_REPO
 # Intra layer OpenCV
-FROM rbonghi/isaac-ros-base:opencv-${OPENCV_VERSION} as opencv_builder
+FROM ${DOCKER_REPO}:opencv-${OPENCV_VERSION} as opencv_builder
 
 RUN cp /opt/opencv/build/OpenCV-*.tar.gz /OpenCV.tar.gz
 
