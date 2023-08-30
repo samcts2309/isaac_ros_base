@@ -75,7 +75,9 @@ elif [ $ARCH = "x86_64" ]; then
 		echo "$opencv_conda_path already exists, replacing..."
 		rm -rf $opencv_conda_path
 		ln -s /usr/lib/python${PYTHON3_VERSION}/site-packages/cv2 $opencv_conda_path
-	fi
+	else
+		export PYTHONPATH=$PYTHONPATH:/usr/lib/python3.8/site-packages
+	fi	
 fi
 
 # test importing cv2

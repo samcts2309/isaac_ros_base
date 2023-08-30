@@ -133,8 +133,10 @@ RUN TERM=xterm bash /opt/install_opencv.sh ${OPENCV_VERSION} \
 
 ############ Patch #########################################
 # Apply libcudacxx patch for fixing C++17 compilation errors in GXF
+COPY scripts/patch_libcudacxx.sh /opt/patch_libcudacxx.sh
 COPY patches/libcudacxx_aarch64_cuda_11_4.diff /tmp/
-RUN patch -i /tmp/libcudacxx_aarch64_cuda_11_4.diff /usr/local/cuda-11.4/targets/aarch64-linux/include/cuda/std/detail/libcxx/include/cmath
+RUN TERM=xterm bash /opt/patch_libcudacxx.sh \ 
+    && rm /opt/patch_libcudacxx.sh /tmp/libcudacxx_aarch64_cuda_11_4.diff
 
 ############################################################
 
