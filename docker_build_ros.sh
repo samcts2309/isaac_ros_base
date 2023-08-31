@@ -33,7 +33,7 @@ reset=`tput sgr0`
 
 docker_repo_name=novelte/jetson_dev
 BASE_DIST=ubuntu20.04
-L4T=35.4
+L4T=35.3
 CUDA_VERSION=11.4.3
 OPENCV_VERSION=4.6.0
 BUILD_BASE=devel
@@ -213,8 +213,12 @@ main()
         fi
     fi
 
-    a=( ${L4T//./ } ) # replace points, split into array
-    if (($a < 35)) ; then
+    if ((${L4T} > 35.3)) ; then
+        echo "${red} L4t version higher than 35.3 is not supported"
+        exit 1
+    fi
+
+    if ((${L4T//./ } < 35)) ; then
         BASE_DIST=ubuntu18.04
     fi
 
@@ -282,10 +286,6 @@ main()
             TRITON_VERSION=2.30.0
         elif [ $L4T == 35.3 ] ; then
             L4T_MINOR_VERSION=3.0
-            JETPACK=5.1
-            TRITON_VERSION=2.30.0
-        elif [ $L4T == 35.4 ] ; then
-            L4T_MINOR_VERSION=4.0
             JETPACK=5.1
             TRITON_VERSION=2.30.0
         fi
