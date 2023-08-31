@@ -20,7 +20,7 @@
 
 ARG BASE_DIST
 ARG CUDA_VERSION
-FROM nvidia/cuda:${CUDA_VERSION}-devel-${BASE_DIST}
+FROM nvidia/cuda:${CUDA_VERSION}-cudnn8-devel-${BASE_DIST}
 
 #
 # setup environment
@@ -91,10 +91,6 @@ RUN apt-get update \
         python3-setuptools \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
-
-COPY scripts/install_cudnn.sh /opt/install_cudnn.sh
-RUN /opt/install_cudnn.sh ${L4T} true && \
-    rm /opt/install_cudnn.sh
 
 # OpenCV looks for the cuDNN version in cudnn_version.h, but it's been renamed to cudnn_version_v8.h
 RUN ln -s /usr/include/$(uname -i)-linux-gnu/cudnn_version_v8.h /usr/include/$(uname -i)-linux-gnu/cudnn_version.h

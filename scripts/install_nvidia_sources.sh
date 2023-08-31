@@ -49,7 +49,6 @@ else
         apt-get install -y nvidia-l4t-cuda
     fi
 
-    
     apt-get upgrade -y 
     # Workaround to source libraries on Docker
     echo "Installing sources jetson-multimedia-api"
