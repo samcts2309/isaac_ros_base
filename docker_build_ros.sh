@@ -34,7 +34,7 @@ reset=`tput sgr0`
 docker_repo_name=novelte/jetson_dev
 BASE_DIST=ubuntu20.04
 L4T=35.3
-CUDA_VERSION=11.4.3
+CUDA_VERSION=11.8.0
 OPENCV_VERSION=4.6.0
 BUILD_BASE=devel
 
@@ -267,6 +267,8 @@ main()
             --build-arg L4T="$L4T" \
             --build-arg CUDA_VERSION="$CUDA_VERSION" \
             --build-arg OPENCV_VERSION="$OPENCV_VERSION" \
+            --cache-to=type=local,dest=/home/novelte/Docker-Cache \
+            --cache-from=type=local,src=/home/novelte/Docker-Cache \
             $multiarch_option \
             -f Dockerfile.opencv \
             . || { echo "${red}docker build failure!${reset}"; exit 1; }
@@ -320,6 +322,8 @@ main()
             --build-arg CUDA_VERSION="$CUDA_VERSION" \
             --build-arg OPENCV_VERSION="$OPENCV_VERSION" \
             --build-arg DOCKER_REPO="$docker_repo_name" \
+            --cache-to=type=local,dest=/home/novelte/Docker-Cache/devel,mode=max \
+            --cache-from=type=local,src=/home/novelte/Docker-Cache/devel \
             $multiarch_option \
             -f Dockerfile.$option \
             . || { echo "${red}docker build failure!${reset}"; exit 1; }
@@ -330,6 +334,8 @@ main()
             -t $docker_repo_name:$TAG \
             -t $docker_repo_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} \
             --build-arg BASE_IMAGE="$docker_repo_name:$TAG" \
+            --cache-to=type=local,dest=/home/novelte/Docker-Cache/devel,mode=max \
+            --cache-from=type=local,src=/home/novelte/Docker-Cache/devel \
             $multiarch_option \
             -f Dockerfile.realsense \
             . || { echo "${red}docker build failure!${reset}"; exit 1; }
@@ -358,6 +364,8 @@ main()
             -t $docker_repo_name:$TAG \
             -t $docker_repo_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} \
             --build-arg BASE_IMAGE="$BASE_IMAGE" \
+            --cache-to=type=local,dest=/home/novelte/Docker-Cache \
+            --cache-from=type=local,src=/home/novelte/Docker-Cache \
             $multiarch_option \
             -f Dockerfile.humble.$ROS_PKG \
             . || { echo "${red}docker build failure!${reset}"; exit 1; }

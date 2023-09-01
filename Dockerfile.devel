@@ -27,7 +27,7 @@ FROM ${DOCKER_REPO}:opencv-${OPENCV_VERSION} as opencv_builder
 
 RUN cp /opt/opencv/build/OpenCV-*.tar.gz /OpenCV.tar.gz
 
-FROM nvidia/cuda:${CUDA_VERSION}-devel-${BASE_DIST}
+FROM nvidia/cuda:${CUDA_VERSION}-devel-${BASE_DIST} as stage-1
 
 # L4T variables
 ARG JETPACK
@@ -35,6 +35,7 @@ ARG L4T
 ARG L4T_MINOR_VERSION
 # NVIDIA software
 ARG TAO_TENSORRT_VERSION=8.4
+ARG TRT_VERSION=8.5.2.2
 ARG TRITON_VERSION
 
 # Disable terminal interaction for apt
@@ -85,7 +86,7 @@ RUN python3 -m pip install -U \
         numpy
 
 ########### Sources and main Jetson repo ###################
-
+FROM stage-1 as stage-2
 COPY scripts/variables.sh /variables.sh
 COPY scripts/install_nvidia_sources.sh install_nvidia_sources.sh
 RUN TERM=xterm bash install_nvidia_sources.sh ${L4T} \
@@ -97,17 +98,26 @@ ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/compat"
 ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/aarch64-linux-gnu/tegra:/usr/lib/aarch64-linux-gnu/tegra-egl"
 
 ########### VPI & TensorRT #################################
-
+FROM stage-2 as stage-3
 RUN apt-get update \
-    && apt-get install -y tensorrt libnvvpi2 vpi2-dev \
+    && apt-get install -y libnvvpi2 vpi2-dev \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
-
 ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/nvidia/vpi2/lib64"
+
+RUN v="${TRT_VERSION%.*}-1+cuda${CUDA_VERSION%.*}" &&\
+    apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub &&\
+    apt-get update &&\
+    apt-get install -y libnvinfer8=${v} libnvonnxparsers8=${v} libnvparsers8=${v} libnvinfer-plugin8=${v} \
+        libnvinfer-dev=${v} libnvonnxparsers-dev=${v} libnvparsers-dev=${v} libnvinfer-plugin-dev=${v} \
+        python3-libnvinfer=${v} libnvinfer-samples=${v} libnvinfer-bin=${v}
+RUN v="${TRT_VERSION}-1+cuda${CUDA_VERSION%.*}" &&\
+    apt-get install -y tensorrt=${v}
+
 ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda-11.4/targets/x86_64-linux/lib/stubs:/usr/local/cuda-11.4/targets/aarch64-linux/lib/stubs"
 
 ############ TAO converter #################################
-
+FROM stage-3 as stage-4
 COPY tao /opt/nvidia/tao
 RUN TERM=xterm bash /opt/nvidia/tao/install_tao.sh ${TAO_TENSORRT_VERSION} \
     && rm /opt/nvidia/tao/install_tao.sh
@@ -115,7 +125,7 @@ RUN TERM=xterm bash /opt/nvidia/tao/install_tao.sh ${TAO_TENSORRT_VERSION} \
 ENV PATH="${PATH}:/opt/nvidia/tao"
 
 ############ Tritonserver ##################################
-
+FROM stage-4 as stage-5
 COPY scripts/install_tritonserver.sh install_tritonserver.sh
 RUN TERM=xterm bash install_tritonserver.sh ${TRITON_VERSION} ${JETPACK} \
     && rm install_tritonserver.sh
@@ -123,7 +133,7 @@ RUN TERM=xterm bash install_tritonserver.sh ${TRITON_VERSION} ${JETPACK} \
 ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/tritonserver/lib"
 
 ############ OpenCV ########################################
-
+FROM stage-5 as stage-6
 # Load from OpenCV builder tar file
 COPY --from=opencv_builder /OpenCV.tar.gz /opt/OpenCV.tar.gz
 # Install OpenCV on system
@@ -132,11 +142,14 @@ RUN TERM=xterm bash /opt/install_opencv.sh ${OPENCV_VERSION} \
     && rm /opt/install_opencv.sh /opt/OpenCV.tar.gz
 
 ############ Patch #########################################
-# Apply libcudacxx patch for fixing C++17 compilation errors in GXF
+FROM stage-6 as stage-7
+# Apply libcudacxx patch for fixing C++17 compilation errors in GXF on Cuda 11.4 aarch
 COPY scripts/patch_libcudacxx.sh /opt/patch_libcudacxx.sh
 COPY patches/libcudacxx_aarch64_cuda_11_4.diff /tmp/
-RUN TERM=xterm bash /opt/patch_libcudacxx.sh \ 
-    && rm /opt/patch_libcudacxx.sh /tmp/libcudacxx_aarch64_cuda_11_4.diff
+RUN if [ "${CUDA_VERSION%.*}" = "11.4" ]; then \
+        TERM=xterm bash /opt/patch_libcudacxx.sh; \ 
+    fi
+RUN rm /opt/patch_libcudacxx.sh /tmp/libcudacxx_aarch64_cuda_11_4.diff
 
 ############################################################
 

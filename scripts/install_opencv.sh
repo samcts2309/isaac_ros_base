@@ -67,7 +67,7 @@ if [ $ARCH = "aarch64" ]; then
 	
 	ln -s /usr/include/opencv4 $local_include_path
 	ln -s /usr/lib/python${PYTHON3_VERSION}/dist-packages/cv2 $local_python_path
-	
+	export PYTHONPATH=$PYTHONPATH:/usr/lib/python3.8/site-packages
 elif [ $ARCH = "x86_64" ]; then
 	opencv_conda_path="/opt/conda/lib/python${PYTHON3_VERSION}/site-packages/cv2"
 	
