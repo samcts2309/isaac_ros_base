@@ -322,8 +322,8 @@ main()
             --build-arg CUDA_VERSION="$CUDA_VERSION" \
             --build-arg OPENCV_VERSION="$OPENCV_VERSION" \
             --build-arg DOCKER_REPO="$docker_repo_name" \
-            --cache-to=type=local,dest=/home/novelte/Docker-Cache/devel,mode=max \
-            --cache-from=type=local,src=/home/novelte/Docker-Cache/devel \
+            --cache-to=type=local,dest=/home/novelte/Docker-Cache,mode=max \
+            --cache-from=type=local,src=/home/novelte/Docker-Cache \
             $multiarch_option \
             -f Dockerfile.$option \
             . || { echo "${red}docker build failure!${reset}"; exit 1; }
@@ -334,8 +334,8 @@ main()
             -t $docker_repo_name:$TAG \
             -t $docker_repo_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} \
             --build-arg BASE_IMAGE="$docker_repo_name:$TAG" \
-            --cache-to=type=local,dest=/home/novelte/Docker-Cache/devel,mode=max \
-            --cache-from=type=local,src=/home/novelte/Docker-Cache/devel \
+            --cache-to=type=local,dest=/home/novelte/Docker-Cache,mode=max \
+            --cache-from=type=local,src=/home/novelte/Docker-Cache \
             $multiarch_option \
             -f Dockerfile.realsense \
             . || { echo "${red}docker build failure!${reset}"; exit 1; }
@@ -364,7 +364,7 @@ main()
             -t $docker_repo_name:$TAG \
             -t $docker_repo_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} \
             --build-arg BASE_IMAGE="$BASE_IMAGE" \
-            --cache-to=type=local,dest=/home/novelte/Docker-Cache \
+            --cache-to=type=local,dest=/home/novelte/Docker-Cache,mode=max \
             --cache-from=type=local,src=/home/novelte/Docker-Cache \
             $multiarch_option \
             -f Dockerfile.humble.$ROS_PKG \
