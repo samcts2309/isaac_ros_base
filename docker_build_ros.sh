@@ -281,6 +281,7 @@ main()
         local JETPACK=5.0.2
         local TAO_TENSORRT_VERSION=8.4
         local TRITON_VERSION=2.24.0
+        local TRT_VERSION=8.5.2.2
 
         if [ $L4T == 35.2 ] ; then
             L4T_MINOR_VERSION=2.0
@@ -313,7 +314,8 @@ main()
             $CI_OPTIONS \
             -t $docker_repo_name:$TAG \
             -t $docker_repo_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} \
-            --build-arg TENSORRT_VERSION="$TENSORRT_VERSION" \
+            --build-arg TAO_TENSORRT_VERSION="$TENSORRT_VERSION" \
+            --build-arg TRT_VERSION="$TRT_VERSION" \
             --build-arg TRITON_VERSION="$TRITON_VERSION" \
             --build-arg BASE_DIST="$BASE_DIST" \
             --build-arg L4T="$L4T" \
