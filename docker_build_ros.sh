@@ -37,6 +37,7 @@ L4T=35.3
 CUDA_VERSION=11.8.0
 OPENCV_VERSION=4.6.0
 BUILD_BASE=devel
+ROS_DISTRO=humble
 
 usage()
 {
@@ -48,6 +49,7 @@ usage()
     echo "$name isaac_ros_base for different architectures." >&2
     echo "${bold}Commands:${reset}" >&2
     echo "  $name help                          This help" >&2
+    echo "  $name base                          Build L4T Base image">&2
     echo "  $name opencv [OPTIONS ...]          Build opencv image" >&2
     echo "  $name devel [OPTIONS ...]           Build devel image" >&2
     echo "  $name runtime [OPTIONS ...]         Build runtime image" >&2
@@ -67,6 +69,7 @@ usage()
     echo " --l4t                                Build with L4T Default: L4T=$L4T" >&2
     echo " --arm64                              Build for arm64 architecture" >&2
     echo " --amd64                              Build for x86_64 architecture" >&2
+    echo " --distro                             Build ROS Distro Default: ROS_DISTRO=$ROS_DISTRO" >&2
     echo " --manifest                           Build and push a manifest to merge two architecture" >&2
 }
 

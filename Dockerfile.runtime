@@ -7,7 +7,7 @@ FROM ${DOCKER_REPO}:opencv-${OPENCV_VERSION} as opencv_builder
 
 RUN cp /opt/opencv/build/OpenCV-*.tar.gz /OpenCV.tar.gz
 
-FROM nvidia/cuda:${CUDA_VERSION}-runtime-${BASE_DIST}
+FROM nvidia/cuda:${CUDA_VERSION}-cudnn8-runtime-${BASE_DIST}
 
 # L4T variables
 ARG JETPACK=5.0.2
@@ -67,13 +67,22 @@ ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/compat"
 ########### VPI & TensorRT #################################
 
 RUN apt-get update \
-    && apt-get install -y libnvvpi2 vpi2-dev \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
+    && apt-get install -y libnvvpi2 vpi2-dev
 ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/nvidia/vpi2/lib64"
 
+ENV CUDNN_VERSION="$(apt policy libcudnn8 | grep Installed)"
+
+RUN v="${TRT_VERSION%.*}-1+cuda${CUDA_VERSION%.*}" &&\
+    cudnn_version="${CUDNN_VERSION#*:}" &&\
+    apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub &&\
+    apt-get update &&\
+    apt-get install -y libnvinfer8=${v} libnvonnxparsers8=${v} libnvparsers8=${v} libnvinfer-plugin8=${v} \
+        libnvinfer-dev=${v} libnvonnxparsers-dev=${v} libnvparsers-dev=${v} libnvinfer-plugin-dev=${v} \
+        python3-libnvinfer=${v} libnvinfer-samples=${v} libnvinfer-bin=${v} libcudnn8-dev=${cudnn_version}
 RUN v="${TRT_VERSION}-1+cuda${CUDA_VERSION%.*}" &&\
     apt-get install -y tensorrt=${v}
+RUN rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
 ############ OpenCV ########################################
 
