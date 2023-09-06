@@ -74,7 +74,6 @@ ENV CUDNN_VERSION="$(apt policy libcudnn8 | grep Installed)"
 
 RUN v="${TRT_VERSION%.*}-1+cuda${CUDA_VERSION%.*}" &&\
     cudnn_version="${CUDNN_VERSION#*:}" &&\
-    apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub &&\
     apt-get update &&\
     apt-get install -y libnvinfer8=${v} libnvonnxparsers8=${v} libnvparsers8=${v} libnvinfer-plugin8=${v} \
         libnvinfer-dev=${v} libnvonnxparsers-dev=${v} libnvparsers-dev=${v} libnvinfer-plugin-dev=${v} \
