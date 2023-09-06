@@ -25,7 +25,7 @@ FROM ${BASE_IMAGE}
 # ROS distributions
 # https://discourse.ros.org/t/core-base-and-desktop-releases/20267
 ARG ROS_PKG=ros_core
-ENV ROS_DISTRO=humble
+ARG ROS_DISTRO=humble
 ENV ROS_ROOT=/opt/ros/${ROS_DISTRO}
 
 # ROS2 Humble installation
