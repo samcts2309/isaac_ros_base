@@ -406,11 +406,14 @@ main()
         fi
         # Otherwise build the image
         # Temporary disabled buildx, need fix VPI for x86 architecture
-        docker build \
+        docker ${BUILDX} build \
             $CI_OPTIONS \
             -t $docker_repo_name:$TAG-$ARCH \
             -t $docker_repo_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T}-$ARCH \
+            --cache-to=type=local,dest=/home/novelte/Docker-Cache,mode=max \
+            --cache-from=type=local,src=/home/novelte/Docker-Cache \
             --build-arg BASE_IMAGE="$BASE_IMAGE" \
+            $multiarch_option \
             -f Dockerfile.isaac \
             . || { echo "${red}docker build failure!${reset}"; exit 1; }
 
