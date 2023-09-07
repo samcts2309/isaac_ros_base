@@ -49,11 +49,10 @@ usage()
     echo "$name isaac_ros_base for different architectures." >&2
     echo "${bold}Commands:${reset}" >&2
     echo "  $name help                          This help" >&2
-    echo "  $name base                          Build L4T Base image">&2
     echo "  $name opencv [OPTIONS ...]          Build opencv image" >&2
     echo "  $name devel [OPTIONS ...]           Build devel image" >&2
     echo "  $name runtime [OPTIONS ...]         Build runtime image" >&2
-    echo "  $name humble [BASE] [OPTIONS ...]   Build ROS2 humble image" >&2
+    echo "  $name ros [BASE] [OPTIONS ...]      Build ROS2 ros image" >&2
     echo "  $name gems [OPTIONS ...]            Build all Isaac ROS packages in a image" >&2
     echo
     echo "${bold}BASE:${reset}" >&2
@@ -117,7 +116,7 @@ main()
     fi
 
     local ROS_PKG=""
-    if [ $option = "humble" ] ; then
+    if [ $option = "ros" ] ; then
         case "$2" in
             core)
                 ROS_PKG=core
@@ -165,6 +164,9 @@ main()
                 ;;
             --extract)
                 EXTRACT=true
+                ;;
+            --distro)
+                ROS_DISTRO="humble"
                 ;;
             --manifest)
                 MANIFEST=true
@@ -270,8 +272,6 @@ main()
             --build-arg L4T="$L4T" \
             --build-arg CUDA_VERSION="$CUDA_VERSION" \
             --build-arg OPENCV_VERSION="$OPENCV_VERSION" \
-            --cache-to=type=local,dest=/home/novelte/Docker-Cache \
-            --cache-from=type=local,src=/home/novelte/Docker-Cache \
             $multiarch_option \
             -f Dockerfile.opencv \
             . || { echo "${red}docker build failure!${reset}"; exit 1; }
@@ -327,8 +327,6 @@ main()
             --build-arg CUDA_VERSION="$CUDA_VERSION" \
             --build-arg OPENCV_VERSION="$OPENCV_VERSION" \
             --build-arg DOCKER_REPO="$docker_repo_name" \
-            --cache-to=type=local,dest=/home/novelte/Docker-Cache,mode=max \
-            --cache-from=type=local,src=/home/novelte/Docker-Cache \
             $multiarch_option \
             -f Dockerfile.$option \
             . || { echo "${red}docker build failure!${reset}"; exit 1; }
@@ -339,8 +337,6 @@ main()
             -t $docker_repo_name:$TAG \
             -t $docker_repo_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} \
             --build-arg BASE_IMAGE="$docker_repo_name:$TAG" \
-            --cache-to=type=local,dest=/home/novelte/Docker-Cache,mode=max \
-            --cache-from=type=local,src=/home/novelte/Docker-Cache \
             $multiarch_option \
             -f Dockerfile.realsense \
             . || { echo "${red}docker build failure!${reset}"; exit 1; }
@@ -369,8 +365,6 @@ main()
             -t $docker_repo_name:$TAG \
             -t $docker_repo_name:$TAG-${OPENCV_VERSION}-cuda${CUDA_VERSION}-${BASE_DIST}-L4T${L4T} \
             --build-arg BASE_IMAGE="$BASE_IMAGE" \
-            --cache-to=type=local,dest=/home/novelte/Docker-Cache,mode=max \
-            --cache-from=type=local,src=/home/novelte/Docker-Cache \
             $multiarch_option \
             -f Dockerfile.humble.$ROS_PKG \
             . || { echo "${red}docker build failure!${reset}"; exit 1; }

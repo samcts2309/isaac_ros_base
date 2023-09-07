@@ -27,7 +27,7 @@ FROM ${DOCKER_REPO}:opencv-${OPENCV_VERSION} as opencv_builder
 
 RUN cp /opt/opencv/build/OpenCV-*.tar.gz /OpenCV.tar.gz
 
-FROM nvidia/cuda:${CUDA_VERSION}-devel-${BASE_DIST} as stage-1
+FROM nvidia/cuda:${CUDA_VERSION}-cudnn8-devel-${BASE_DIST} as stage-1
 
 # L4T variables
 ARG JETPACK
